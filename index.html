@@ -354,7 +354,8 @@
         // Supabase 配置
         const SUPABASE_URL = 'https://jzykyfopwtndrfpuojgk.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_YC0bK4zODx5eukiHAVERAQ_MhAgQc16';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
         
         // 敏感词列表（18+内容）
         const sensitiveWords = [
@@ -437,7 +438,7 @@
         // 修改後的 loadPostsFromSupabase 函數 
         async function loadPostsFromSupabase() { 
             try { 
-                const { data, error } = await supabase 
+                const { data, error } = await supabaseClient 
                     .from('posts') 
                     .select('*') 
                     .order('created_at', { ascending: false }); 
@@ -633,7 +634,7 @@
             }
             
             // 存入 Supabase
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('posts')
                 .insert([{
                     title: title,
