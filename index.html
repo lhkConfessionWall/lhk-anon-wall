@@ -540,28 +540,45 @@
             document.getElementById(`comments-section-${id}`).classList.toggle('hidden');
         }
 
-        window.submitReply = function(postId) {
-            if(!currentUser) return alert('請先登錄！');
-            const content = document.getElementById(`reply-${postId}`).value;
-            const anonymous = document.getElementById(`reply-anonymous-${postId}`).checked;
-            if(!content) return;
+        window.submitReply = async function(postId) { 
+            if(!currentUser) return alert('請先登錄！'); 
+            const content = document.getElementById(`reply-${postId}`).value; 
+            const anonymous = document.getElementById(`reply-anonymous-${postId}`).checked; 
+            if(!content) return; 
             
-            // 检查评论内容是否包含敏感词
-            if (containsSensitiveContent(content)) {
-                alert('评论内容包含敏感词，发布失败！');
-                return;
-            }
+            // 檢查敏感詞 
+            if (containsSensitiveContent(content)) { 
+                alert('評論內容包含敏感詞，發布失敗！'); 
+                return; 
+            } 
             
-            const post = posts.find(p => p.id === postId);
-            post.comments.push({
-                id: Date.now(),
-                author: currentUser.username,
-                content: content,
-                createdAt: new Date().toISOString(),
-                anonymous: anonymous
-            });
-            saveData();
-            renderPosts();
+            const post = posts.find(p => p.id === postId); 
+            const newComment = { 
+                id: Date.now(), 
+                author: currentUser.username, 
+                content: content, 
+                createdAt: new Date().toISOString(), 
+                anonymous: anonymous 
+            }; 
+
+            // 更新本地數據 
+            const updatedComments = [...post.comments, newComment]; 
+
+            // 同步到 Supabase 
+            const { error } = await supabaseClient 
+                .from('posts') 
+                .update({ comments: updatedComments }) 
+                .eq('id', postId); 
+
+            if (error) { 
+                console.error('同步評論失敗:', error); 
+                alert('評論發布失敗：' + error.message); 
+            } else { 
+                post.comments = updatedComments; // 更新成功後同步本地 posts 變量 
+                saveData(); 
+                renderPosts(); 
+                document.getElementById(`reply-${postId}`).value = ''; 
+            } 
         }
 
         // 登錄事件
