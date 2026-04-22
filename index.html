@@ -417,45 +417,56 @@
         
         const pages = ['login-page', 'register-page', 'post-page', 'home-page', 'admin-panel'];
 
-        async function init() {
-            updateNav();
-            // 从Supabase加载帖子数据
-            await loadPostsFromSupabase();
-            showHomePage();
-            renderPosts();
-        }
+        // 修改後的 init 函數 
+        async function init() { 
+            updateNav(); 
+            showHomePage(); // 先顯示基礎頁面結構 
+            
+            // 嘗試加載數據 
+            const success = await loadPostsFromSupabase(); 
+            
+            if (!success) { 
+                // 如果失敗，彈出提示告知用戶 
+                alert('⚠️ 數據庫加載失敗！請檢查 Supabase URL/Key 或網絡連線。'); 
+                postsContainer.innerHTML = '<p style="color:red; text-align:center; padding:20px;">數據庫連線失敗，目前顯示的是離線緩存內容。</p>'; 
+            } 
+            
+            renderPosts(); 
+        } 
         
-        // 从Supabase加载帖子数据
-        async function loadPostsFromSupabase() {
-            try {
-                const { data, error } = await supabase
-                    .from('posts')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+        // 修改後的 loadPostsFromSupabase 函數 
+        async function loadPostsFromSupabase() { 
+            try { 
+                const { data, error } = await supabase 
+                    .from('posts') 
+                    .select('*') 
+                    .order('created_at', { ascending: false }); 
                 
-                if (error) {
-                    console.error('从Supabase加载帖子失败:', error);
-                    return;
-                }
+                if (error) { 
+                    console.error('Supabase 報錯:', error.message); 
+                    return false; // 返回失敗狀態 
+                } 
                 
-                if (data && data.length > 0) {
-                    // 转换数据格式以匹配本地存储格式
-                    posts = data.map(post => ({
-                        id: post.id || Date.now(),
-                        title: post.title,
-                        content: post.content,
-                        author: post.author,
-                        authorId: 1, // 默认作者ID
-                        anonymous: post.is_anonymous,
-                        pinned: post.pinned || false,
-                        createdAt: post.created_at || new Date().toISOString(),
-                        comments: post.comments || []
-                    }));
-                    saveData(); // 更新本地存储
-                }
-            } catch (error) {
-                console.error('加载帖子时出错:', error);
-            }
+                if (data) { 
+                    posts = data.map(post => ({ 
+                        id: post.id || Date.now(), 
+                        title: post.title, 
+                        content: post.content, 
+                        author: post.author, 
+                        authorId: 1, 
+                        anonymous: post.is_anonymous, 
+                        pinned: post.pinned || false, 
+                        createdAt: post.created_at || new Date().toISOString(), 
+                        comments: post.comments || [] 
+                    })); 
+                    saveData(); 
+                    return true; // 返回成功狀態 
+                } 
+            } catch (err) { 
+                console.error('網絡或代碼錯誤:', err); 
+                return false; 
+            } 
+            return false; 
         }
 
         function updateNav() {
