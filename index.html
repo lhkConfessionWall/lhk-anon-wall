@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LHK匿名交流社區</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-color: #10b981;
@@ -349,6 +351,11 @@
     </div>
 
     <script>
+        // Supabase 配置
+        const SUPABASE_URL = 'https://jzykyfopwtndrfpuojgk.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_YC0bK4zODx5eukiHAVERAQ_MhAgQc16';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
         // 敏感词列表（18+内容）
         const sensitiveWords = [
             '色情', '黄色', '成人', '淫秽', '色情图片', '色情视频',
@@ -410,10 +417,45 @@
         
         const pages = ['login-page', 'register-page', 'post-page', 'home-page', 'admin-panel'];
 
-        function init() {
+        async function init() {
             updateNav();
+            // 从Supabase加载帖子数据
+            await loadPostsFromSupabase();
             showHomePage();
             renderPosts();
+        }
+        
+        // 从Supabase加载帖子数据
+        async function loadPostsFromSupabase() {
+            try {
+                const { data, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('从Supabase加载帖子失败:', error);
+                    return;
+                }
+                
+                if (data && data.length > 0) {
+                    // 转换数据格式以匹配本地存储格式
+                    posts = data.map(post => ({
+                        id: post.id || Date.now(),
+                        title: post.title,
+                        content: post.content,
+                        author: post.author,
+                        authorId: 1, // 默认作者ID
+                        anonymous: post.is_anonymous,
+                        pinned: post.pinned || false,
+                        createdAt: post.created_at || new Date().toISOString(),
+                        comments: post.comments || []
+                    }));
+                    saveData(); // 更新本地存储
+                }
+            } catch (error) {
+                console.error('加载帖子时出错:', error);
+            }
         }
 
         function updateNav() {
@@ -469,6 +511,11 @@
                         `).join('')}
                         <div style="margin-top:15px">
                             <textarea id="reply-${post.id}" placeholder="寫下你的評論..." style="width:100%; height:60px; margin-bottom:5px"></textarea>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; font-size: 0.8rem;">
+                                    <input type="checkbox" id="reply-anonymous-${post.id}" checked style="margin-right: 5px;"> 匿名評論
+                                </label>
+                            </div>
                             <button class="btn" onclick="submitReply(${post.id})">提交評論</button>
                         </div>
                     </div>
@@ -484,6 +531,7 @@
         window.submitReply = function(postId) {
             if(!currentUser) return alert('請先登錄！');
             const content = document.getElementById(`reply-${postId}`).value;
+            const anonymous = document.getElementById(`reply-anonymous-${postId}`).checked;
             if(!content) return;
             
             // 检查评论内容是否包含敏感词
@@ -494,10 +542,11 @@
             
             const post = posts.find(p => p.id === postId);
             post.comments.push({
+                id: Date.now(),
                 author: currentUser.username,
                 content: content,
                 createdAt: new Date().toISOString(),
-                anonymous: true
+                anonymous: anonymous
             });
             saveData();
             renderPosts();
@@ -560,10 +609,11 @@
         navLogout.onclick = (e) => { e.preventDefault(); currentUser = null; localStorage.removeItem('currentUser'); updateNav(); showHomePage(); };
         
         // 發帖邏輯
-        document.getElementById('post-form').onsubmit = (e) => {
+        document.getElementById('post-form').onsubmit = async (e) => {
             e.preventDefault();
             const title = document.getElementById('post-title').value;
             const content = document.getElementById('post-content').value;
+            const anonymous = document.getElementById('post-anonymous').checked;
             
             // 检查标题和内容是否包含敏感词
             if (containsSensitiveContent(title) || containsSensitiveContent(content)) {
@@ -571,20 +621,36 @@
                 return;
             }
             
-            const newPost = {
-                id: Date.now(),
-                title: title,
-                content: content,
-                author: currentUser.username,
-                anonymous: document.getElementById('post-anonymous').checked,
-                pinned: false,
-                createdAt: new Date().toISOString(),
-                comments: []
-            };
-            posts.unshift(newPost);
-            saveData();
-            showHomePage();
-            document.getElementById('post-form').reset();
+            // 存入 Supabase
+            const { error } = await supabase
+                .from('posts')
+                .insert([{
+                    title: title,
+                    content: content,
+                    author: currentUser.username,
+                    is_anonymous: anonymous,
+                    pinned: false
+                }]);
+            
+            if (error) {
+                alert('發布失敗，請檢查資料庫連線：' + error.message);
+            } else {
+                // 同时更新本地存储
+                const newPost = {
+                    id: Date.now(),
+                    title: title,
+                    content: content,
+                    author: currentUser.username,
+                    anonymous: anonymous,
+                    pinned: false,
+                    createdAt: new Date().toISOString(),
+                    comments: []
+                };
+                posts.unshift(newPost);
+                saveData();
+                showHomePage();
+                document.getElementById('post-form').reset();
+            }
         };
         
         // 管理員後台功能
