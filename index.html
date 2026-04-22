@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LHK匿名交流社區</title>
+    <style>
+        :root {
+            --primary-color: #10b981;
+            --primary-hover: #059669;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        body {
+            font-family: "PingFang HK", "Helvetica Neue", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: -30px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* 導航欄 */
+        nav {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-color);
+            background-color: #ecfdf5;
+        }
+
+        /* 內容區塊 */
+        .content {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 15px;
+            color: var(--text-main);
+        }
+
+        /* 表單樣式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        /* 按鈕樣式 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-secondary {
+            background-color: #9ca3af;
+        }
+
+        .btn-secondary:hover {
+            background-color: #6b7280;
+        }
+
+        /* 帖子卡片 */
+        .post {
+            background-color: #fff;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 1px solid #edf2f7;
+            position: relative;
+        }
+
+        .post:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.01);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 10px;
+        }
+
+        .post-author {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .post-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .post h3 {
+            margin: 10px 0;
+            color: var(--text-main);
+        }
+
+        .post-content {
+            color: #4b5563;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 評論區 */
+        .comment {
+            background-color: #f9fafb;
+            padding: 15px;
+            margin-top: 12px;
+            margin-left: 20px;
+            border-radius: 10px;
+            border-left: 3px solid #d1d5db;
+        }
+
+        .anonymous {
+            background-color: #f3f4f6;
+            color: #6b7280;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-style: normal;
+        }
+
+        /* 管理員面板 */
+        .admin-panel {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            border: 2px dashed var(--primary-color);
+        }
+
+        .hidden { display: none; }
+
+        .login-container {
+            max-width: 400px;
+            margin: 60px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 600px) {
+            .container { margin-top: 0; }
+            header h1 { font-size: 1.8rem; }
+            nav ul { gap: 10px; }
+            .btn { width: 100%; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LHK匿名交流社區</h1>
+        <p style="margin-top: 10px; opacity: 0.9;">自由發言，守護隱私</p>
+    </header>
+    
+    <div class="container">
+        <nav id="nav">
+            <ul>
+                <li><a href="#" id="nav-home">首頁</a></li>
+                <li><a href="#" id="nav-post">發布帖子</a></li>
+                <li><a href="#" id="nav-login" class="login-link">登錄</a></li>
+                <li><a href="#" id="nav-register" class="login-link">註冊</a></li>
+                <li><a href="#" id="nav-admin" class="admin-link hidden">管理員後台</a></li>
+                <li><a href="#" id="nav-logout" class="user-link hidden">退出</a></li>
+                <li><span id="user-info" class="user-link hidden" style="font-weight: bold; color: var(--primary-color);"></span></li>
+            </ul>
+        </nav>
+        
+        <div id="login-page" class="login-container hidden">
+            <h2>用戶登錄</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>用戶名</label>
+                    <input type="text" id="login-username" placeholder="請輸入用戶名" required>
+                </div>
+                <div class="form-group">
+                    <label>密碼</label>
+                    <input type="password" id="login-password" placeholder="請輸入密碼" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn">立即登錄</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-login">取消</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="register-page" class="login-container hidden">
+            <h2>用戶註冊</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label>用戶名</label>
+                    <input type="text" id="register-username" placeholder="建議使用暱稱" required>
+                </div>
+                <div class="form-group">
+                    <label>密碼</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <div class="form-group">
+                    <label>確認密碼</label>
+                    <input type="password" id="register-confirm-password" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn">完成註冊</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-register">取消</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="post-page" class="content hidden">
+            <h2>發布新帖子</h2>
+            <form id="post-form">
+                <div class="form-group">
+                    <label>標題</label>
+                    <input type="text" id="post-title" placeholder="標題要吸引人喔..." required>
+                </div>
+                <div class="form-group">
+                    <label>內容</label>
+                    <textarea id="post-content" placeholder="分享你想說的話..." required></textarea>
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="post-anonymous" style="width: 20px; height: 20px;"> 
+                    <label for="post-anonymous" style="margin-bottom: 0;">匿名發布</label>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn">公開發布</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-post">取消</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="home-page" class="content">
+            <h2>最新動態</h2>
+            <div id="posts-container">
+                </div>
+        </div>
+        
+        <div id="admin-panel" class="admin-panel hidden">
+            <h2>管理員工作台</h2>
+            <div class="admin-actions" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <button class="btn" id="admin-manage-users">管理用戶</button>
+                <button class="btn" id="admin-manage-posts">管理帖子</button>
+                <button class="btn btn-secondary" id="admin-logout">退出後台</button>
+            </div>
+            <div id="admin-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 敏感词列表（18+内容）
+        const sensitiveWords = [
+            '色情', '黄色', '成人', '淫秽', '色情图片', '色情视频',
+            '赌博', '毒品', '暴力', '血腥', '恐怖', '政治敏感',
+            '反动', '违法', '诈骗', '广告', 'spam', '垃圾信息'
+        ];
+        
+        // 检查内容是否包含敏感词
+        function containsSensitiveContent(content) {
+            const lowerContent = content.toLowerCase();
+            return sensitiveWords.some(word => lowerContent.includes(word.toLowerCase()));
+        }
+        
+        // 模拟数据存储
+        let users = JSON.parse(localStorage.getItem('users')) || [
+            { id: 1, username: 'admin', password: 'admin123998801112233', role: 'admin' },
+            { id: 2, username: 'user1', password: '123456', role: 'user' }
+        ];
+        
+        let posts = JSON.parse(localStorage.getItem('posts')) || [
+            {
+                id: 1,
+                title: '歡迎來到校園匿名社區！',
+                content: '這裡可以自由分享校園生活，請遵守社區規範喔！',
+                author: '管理員',
+                authorId: 1,
+                anonymous: false,
+                pinned: true,
+                createdAt: new Date().toISOString(),
+                comments: [
+                    {
+                        id: 1,
+                        content: '介面做得好漂亮呀！',
+                        author: '學生A',
+                        authorId: 2,
+                        anonymous: true,
+                        createdAt: new Date().toISOString()
+                    }
+                ]
+            }
+        ];
+
+        // 核心邏輯保持不變，更新 UI 操作
+        function saveData() {
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('posts', JSON.stringify(posts));
+        }
+
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+        const navHome = document.getElementById('nav-home');
+        const navPost = document.getElementById('nav-post');
+        const navLogin = document.getElementById('nav-login');
+        const navRegister = document.getElementById('nav-register');
+        const navAdmin = document.getElementById('nav-admin');
+        const navLogout = document.getElementById('nav-logout');
+        const userInfo = document.getElementById('user-info');
+        const postsContainer = document.getElementById('posts-container');
+        
+        const pages = ['login-page', 'register-page', 'post-page', 'home-page', 'admin-panel'];
+
+        function init() {
+            updateNav();
+            showHomePage();
+            renderPosts();
+        }
+
+        function updateNav() {
+            if (currentUser) {
+                document.querySelectorAll('.login-link').forEach(link => link.classList.add('hidden'));
+                document.querySelectorAll('.user-link').forEach(link => link.classList.remove('hidden'));
+                userInfo.textContent = `嗨，${currentUser.username}`;
+                if (currentUser.role === 'admin') navAdmin.classList.remove('hidden');
+            } else {
+                document.querySelectorAll('.login-link').forEach(link => link.classList.remove('hidden'));
+                document.querySelectorAll('.user-link').forEach(link => link.classList.add('hidden'));
+                navAdmin.classList.add('hidden');
+            }
+        }
+
+        function showHomePage() { hideAll(); document.getElementById('home-page').classList.remove('hidden'); renderPosts(); }
+        function hideAll() { pages.forEach(p => document.getElementById(p).classList.add('hidden')); }
+
+        function renderPosts() {
+            postsContainer.innerHTML = '';
+            
+            // 排序帖子：置顶帖子在前，然后按时间倒序
+            const sortedPosts = [...posts].sort((a, b) => {
+                if (a.pinned && !b.pinned) return -1;
+                if (!a.pinned && b.pinned) return 1;
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            });
+            
+            sortedPosts.forEach(post => {
+                const authorDisplay = post.anonymous ? '<span class="anonymous">匿名用戶</span>' : post.author;
+                const pinnedBadge = post.pinned ? '<span style="background-color: #ff9800; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-right: 10px;">置顶</span>' : '';
+                const postEl = document.createElement('div');
+                postEl.className = 'post';
+                postEl.innerHTML = `
+                    <div class="post-header">
+                        <span class="post-author">${pinnedBadge}${authorDisplay}</span>
+                        <span class="post-time">${new Date(post.createdAt).toLocaleString('zh-HK')}</span>
+                    </div>
+                    <h3>${post.title}</h3>
+                    <div class="post-content">${post.content}</div>
+                    <div class="post-actions">
+                        <button class="btn" style="padding: 6px 12px; font-size: 0.8rem;" onclick="toggleComments(${post.id})">評論 (${post.comments.length})</button>
+                    </div>
+                    <div id="comments-section-${post.id}" class="hidden" style="margin-top: 15px;">
+                        ${post.comments.map(c => `
+                            <div class="comment">
+                                <div style="display:flex; justify-content:space-between; font-size: 0.8rem;">
+                                    <span style="font-weight:bold">${c.anonymous ? '匿名' : c.author}</span>
+                                    <span style="color:#9ca3af">${new Date(c.createdAt).toLocaleDateString()}</span>
+                                </div>
+                                <div style="margin-top:5px">${c.content}</div>
+                            </div>
+                        `).join('')}
+                        <div style="margin-top:15px">
+                            <textarea id="reply-${post.id}" placeholder="寫下你的評論..." style="width:100%; height:60px; margin-bottom:5px"></textarea>
+                            <button class="btn" onclick="submitReply(${post.id})">提交評論</button>
+                        </div>
+                    </div>
+                `;
+                postsContainer.appendChild(postEl);
+            });
+        }
+
+        window.toggleComments = function(id) {
+            document.getElementById(`comments-section-${id}`).classList.toggle('hidden');
+        }
+
+        window.submitReply = function(postId) {
+            if(!currentUser) return alert('請先登錄！');
+            const content = document.getElementById(`reply-${postId}`).value;
+            if(!content) return;
+            
+            // 检查评论内容是否包含敏感词
+            if (containsSensitiveContent(content)) {
+                alert('评论内容包含敏感词，发布失败！');
+                return;
+            }
+            
+            const post = posts.find(p => p.id === postId);
+            post.comments.push({
+                author: currentUser.username,
+                content: content,
+                createdAt: new Date().toISOString(),
+                anonymous: true
+            });
+            saveData();
+            renderPosts();
+        }
+
+        // 登錄事件
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value;
+            const p = document.getElementById('login-password').value;
+            const user = users.find(x => x.username === u && x.password === p);
+            if(user) {
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                updateNav();
+                showHomePage();
+            } else {
+                alert('帳號或密碼錯誤！');
+            }
+        });
+        
+        // 註冊事件
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('register-username').value;
+            const p = document.getElementById('register-password').value;
+            const cp = document.getElementById('register-confirm-password').value;
+            
+            // 檢查密碼是否一致
+            if(p !== cp) {
+                return alert('密碼確認不匹配！');
+            }
+            
+            // 檢查用戶名是否已存在
+            if(users.some(x => x.username === u)) {
+                return alert('用戶名已存在，請更換其他用戶名！');
+            }
+            
+            // 創建新用戶
+            const newUser = {
+                id: Date.now(),
+                username: u,
+                password: p,
+                role: 'user'
+            };
+            
+            users.push(newUser);
+            saveData();
+            alert('註冊成功！請登入');
+            hideAll();
+            document.getElementById('login-page').classList.remove('hidden');
+        });
+
+        // 導航跳轉
+        navHome.onclick = (e) => { e.preventDefault(); showHomePage(); };
+        navPost.onclick = (e) => { e.preventDefault(); if(!currentUser) return alert('請先登錄'); hideAll(); document.getElementById('post-page').classList.remove('hidden'); };
+        navLogin.onclick = (e) => { e.preventDefault(); hideAll(); document.getElementById('login-page').classList.remove('hidden'); };
+        navRegister.onclick = (e) => { e.preventDefault(); hideAll(); document.getElementById('register-page').classList.remove('hidden'); };
+        navAdmin.onclick = (e) => { e.preventDefault(); if(!currentUser || currentUser.role !== 'admin') return alert('只有管理員可以進入後台'); hideAll(); document.getElementById('admin-panel').classList.remove('hidden'); };
+        navLogout.onclick = (e) => { e.preventDefault(); currentUser = null; localStorage.removeItem('currentUser'); updateNav(); showHomePage(); };
+        
+        // 發帖邏輯
+        document.getElementById('post-form').onsubmit = (e) => {
+            e.preventDefault();
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+            
+            // 检查标题和内容是否包含敏感词
+            if (containsSensitiveContent(title) || containsSensitiveContent(content)) {
+                alert('帖子内容包含敏感词，发布失败！');
+                return;
+            }
+            
+            const newPost = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                author: currentUser.username,
+                anonymous: document.getElementById('post-anonymous').checked,
+                pinned: false,
+                createdAt: new Date().toISOString(),
+                comments: []
+            };
+            posts.unshift(newPost);
+            saveData();
+            showHomePage();
+            document.getElementById('post-form').reset();
+        };
+        
+        // 管理員後台功能
+        document.getElementById('admin-manage-users').onclick = () => {
+            const adminContent = document.getElementById('admin-content');
+            adminContent.innerHTML = `
+                <h3>用戶管理</h3>
+                <ul style="list-style: none; padding: 0;">
+                    ${users.map(user => `
+                        <li style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${user.username}</strong> (${user.role === 'admin' ? '管理員' : '普通用戶'})
+                            </div>
+                            <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteUser(${user.id})">刪除</button>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        };
+        
+        document.getElementById('admin-manage-posts').onclick = () => {
+            const adminContent = document.getElementById('admin-content');
+            adminContent.innerHTML = `
+                <h3>帖子管理</h3>
+                <ul style="list-style: none; padding: 0;">
+                    ${posts.map(post => `
+                        <li style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${post.title}</strong> - ${post.anonymous ? '匿名' : post.author}
+                                ${post.pinned ? '<span style="background-color: #ff9800; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-left: 10px;">已置顶</span>' : ''}
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="${post.pinned ? 'unpinPost' : 'pinPost'}(${post.id})")">${post.pinned ? '取消置顶' : '置顶'}</button>
+                                <button class="btn" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deletePost(${post.id})">刪除</button>
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        };
+        
+        document.getElementById('admin-logout').onclick = () => {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            updateNav();
+            showHomePage();
+        };
+        
+        // 刪除用戶
+        window.deleteUser = function(userId) {
+            if(confirm('確定要刪除這個用戶嗎？')) {
+                users = users.filter(user => user.id !== userId);
+                saveData();
+                document.getElementById('admin-manage-users').click();
+            }
+        };
+        
+        // 刪除帖子
+        window.deletePost = function(postId) {
+            if(confirm('確定要刪除這個帖子嗎？')) {
+                posts = posts.filter(post => post.id !== postId);
+                saveData();
+                document.getElementById('admin-manage-posts').click();
+            }
+        };
+        
+        // 置顶帖子
+        window.pinPost = function(postId) {
+            const post = posts.find(p => p.id === postId);
+            if(post) {
+                post.pinned = true;
+                saveData();
+                document.getElementById('admin-manage-posts').click();
+                alert('帖子已置顶！');
+            }
+        };
+        
+        // 取消置顶帖子
+        window.unpinPost = function(postId) {
+            const post = posts.find(p => p.id === postId);
+            if(post) {
+                post.pinned = false;
+                saveData();
+                document.getElementById('admin-manage-posts').click();
+                alert('帖子已取消置顶！');
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
